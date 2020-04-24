@@ -2,6 +2,8 @@ import requests
 import time
 from bs4 import BeautifulSoup
 import nltk
+from nltk import word_tokenize
+
 
 def get_html(url):
     try:
@@ -41,19 +43,24 @@ def get_content(url):
                 li.find('a')['href']
             time.sleep(0.3)
             html_sub = get_html(comment['link'])
-            soup_word = BeautifulSoup(html_sub, features='lxml')
+            soup_word = BeautifulSoup(html_sub, 'html.parser')
             #print(soup_word)
-            text = soup_word.get_text(strip=True)     
-            tokens = [t for t in text.split()]     
-            freq = nltk.FreqDist(tokens)     
+            print('flag html.parser')
+            text = soup_word.get_text()     
+            print("flag text")
+            tokens = word_tokenize(text)
+            print("tokens")
+            freq = nltk.FreqDist(tokens)
+            
             for key,val in freq.items(): 
                 comment['value'] = val
                 comment['word'] = key
-                print(comment['title'], val, key)
+
                 with open('hello.txt', 'a+') as f:
                     f.write('标题：{} \t 数量： {} \t 词：{} \t 链接：{} \n'.format(
                         comment['title'], comment['value'], comment['word'], comment['link']))
                         
+            
             #comments.append(comment)
             #Out2File(comments)            
             #comment['time'] = li.find(
@@ -96,7 +103,7 @@ def main(base_url, deep):
 #base_url = 'http://tieba.baidu.com/f?kw=%E7%94%9F%E6%B4%BB%E5%A4%A7%E7%88%86%E7%82%B8&ie=utf-8'
 base_url = 'http://example.webscraping.com/places/default/index'
 # 设置需要爬取的页码数量
-deep = 40
+deep = 1
 
 if __name__ == '__main__':
     main(base_url, deep)

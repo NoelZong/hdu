@@ -2,6 +2,7 @@ import requests
 import time
 from bs4 import BeautifulSoup
 import nltk
+import csv
 from nltk import word_tokenize
 
 
@@ -36,30 +37,31 @@ def get_content(url):
         comment = {}
         # 这里使用一个try except 防止爬虫找不到信息从而停止运行
         try:
+            #Avoid being banned
+            time.sleep(0.3)
+
             # 开始筛选信息，并保存到字典中
             comment['title'] = li.find(
                 'a').text.strip()
             comment['link'] = "http://example.webscraping.com" + \
                 li.find('a')['href']
-            time.sleep(0.3)
             html_sub = get_html(comment['link'])
             soup_word = BeautifulSoup(html_sub, 'html.parser')
             #print(soup_word)
-            print('flag html.parser')
+            #get text by soup
             text = soup_word.get_text()     
-            print("flag text")
+            #tokenize text 
             tokens = word_tokenize(text)
-            print("tokens")
+            #query the freq
             freq = nltk.FreqDist(tokens)
             
             for key,val in freq.items(): 
                 comment['value'] = val
                 comment['word'] = key
-
-                with open('hello.txt', 'a+') as f:
-                    f.write('标题：{} \t 数量： {} \t 词：{} \t 链接：{} \n'.format(
-                        comment['title'], comment['value'], comment['word'], comment['link']))
-                        
+                with open('csvtest.csv', 'a+') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow([comment['title'], comment['value'], comment['word'], comment['link']])
+                      
             
             #comments.append(comment)
             #Out2File(comments)            
